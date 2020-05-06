@@ -35,7 +35,24 @@ public class FXMLController {
 
     @FXML
     void doAnalizzaAeroporti(ActionEvent event) {
-    	//TODO
+    	
+    	txtResult.clear();
+    	
+    	int mediaU=4982;
+    	try {
+    		mediaU= Integer.parseInt(distanzaMinima.getText());
+    		
+    	}catch(NumberFormatException e) {
+    		txtResult.appendText("Scrivi un numero intero grandissimo figlio di puttana");
+    		return;
+    	
+    	}
+    	
+    	txtResult.appendText("Il numero di vertici è "+model.getVertici(mediaU)+"\n"+"Il numero di archi è "+model.getArchi(mediaU)+"\n"+"Il grafo è\n"+model.getGrafo(mediaU));
+    	
+    	distanzaMinima.clear();
+    	
+    	
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -47,5 +64,6 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	txtResult.setEditable(false);
     }
 }

@@ -7,9 +7,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import it.polito.tdp.extflightdelays.model.Airline;
 import it.polito.tdp.extflightdelays.model.Airport;
+import it.polito.tdp.extflightdelays.model.Arco;
 import it.polito.tdp.extflightdelays.model.Flight;
 
 public class ExtFlightDelaysDAO {
@@ -37,7 +39,7 @@ public class ExtFlightDelaysDAO {
 		}
 	}
 
-	public List<Airport> loadAllAirports() {
+	public void loadAllAirports(Map<Integer,Airport> aereoporti) {
 		String sql = "SELECT * FROM airports";
 		List<Airport> result = new ArrayList<Airport>();
 
@@ -51,10 +53,12 @@ public class ExtFlightDelaysDAO {
 						rs.getString("CITY"), rs.getString("STATE"), rs.getString("COUNTRY"), rs.getDouble("LATITUDE"),
 						rs.getDouble("LONGITUDE"), rs.getDouble("TIMEZONE_OFFSET"));
 				result.add(airport);
+				aereoporti.put(rs.getInt("ID"), airport);
+				
 			}
 
 			conn.close();
-			return result;
+			
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -91,4 +95,35 @@ public class ExtFlightDelaysDAO {
 			throw new RuntimeException("Error Connection Database");
 		}
 	}
+	
+	public List<Arco> getArchi(Map<Integer,Airport> aereoporti){
+		String sql = "SELECT f2.ORIGIN_AIRPORT_ID AS oa,f1.DESTINATION_AIRPORT_ID AS da,AVG(f1.DISTANCE) AS avg FROM flights AS f1,flights AS f2 WHERE f1.id=f2.ID AND f1.DESTINATION_AIRPORT_ID>f2.ORIGIN_AIRPORT_ID GROUP BY f1.ORIGIN_AIRPORT_ID,f1.DESTINATION_AIRPORT_ID";
+		List<Arco> resultA = new ArrayList<Arco>();
+		
+		try {
+			Connection conn = ConnectDB.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet rs = st.executeQuery();
+			
+			while(rs.next()){
+				Arco a = new Arco(aereoporti.get(rs.getInt("oa")),aereoporti.get(rs.getInt("da")),rs.getLong("avg"));
+				resultA.add(a);
+			}
+		
+		
+		
+		
+		
+			conn.close();
+			return resultA;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+		
+		
+	}
+	
 }
